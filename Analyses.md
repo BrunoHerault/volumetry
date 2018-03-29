@@ -5,6 +5,7 @@ Bruno Hérault
 
 -   [problem statement](#problem-statement)
     -   [data uploading](#data-uploading)
+    -   [data visualization](#data-visualization)
     -   [Including Plots](#including-plots)
 
 problem statement
@@ -58,9 +59,25 @@ summary(flota)
     ##  3rd Qu.:0.3700   3rd Qu.: 1.88788  
     ##  Max.   :1.0690   Max.   :15.61983
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+``` r
+flota$dbh<-flota$DAPcm
+flota$h<-flota$HCm
+```
 
-When you click the **Knit** button a document will be generated that includes both test content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+I suppose that *HCm* is the Commercial Height and *DAPm* the DBH. I change them for easy coding
+
+data visualization
+------------------
+
+``` r
+library("plot3D")
+scatter3D(flota$dbh, flota$h, flota$VOLUME, bty = "g", pch = 18,
+          col = ramp.col(c("blue", "yellow", "red")),
+          xlab = "DBH",
+          ylab ="H", zlab = "V")
+```
+
+![](Analyses_files/figure-markdown_github/3d-1.png)
 
 ``` r
 summary(cars)
