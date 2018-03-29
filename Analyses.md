@@ -11,13 +11,18 @@ Bruno Hérault
     -   [Husch (Finger, 1992)](#husch-finger-1992)
     -   [Spurr (1952)](#spurr-1952)
     -   [Schumacher-Hall (1952)](#schumacher-hall-1952)
+-   [testing for a forest type effect](#testing-for-a-forest-type-effect)
+    -   [on theta\_0](#on-theta_0)
+    -   [on theta\_1](#on-theta_1)
+    -   [on theta\_2](#on-theta_2)
+-   [Conclusions](#conclusions)
 
 problem statement
 =================
 
 From Ervan
 
-*Dis, je bosse avec un Brésilien sur l'estimation de volume au Para et on tente de développer des modèles allométriques pour différents types forestiers. J'aimerais développer un modèle général en regroupant les 3 types forestiers et toutes les données. Ensuite, j'aimerais tester si il y a un effet type forester sur l'estimation du volume. Je fais cela: lmer(volume ~ log(DBH) + log(Htronc) | type.forestier)*
+*Dis, je bosse avec un Brésilien sur l'estimation de volume au Para et on tente de développer des modèles allométriques pour différents types forestiers. J'aimerais développer un modèle général en regroupant les 3 types forestiers et toutes les données. Ensuite, j'aimerais tester si il y a un effet type forester sur l'estimation du volume. Je fais cela: lmer(volume ~ log(DBH) + log(Htronc) | type.forestier) *
 
 data uploading
 --------------
@@ -272,6 +277,110 @@ points(flota$d, summary(v_schum)$summary[1,1] * (flota$d^summary(v_schum)$summar
 summary(v_schum)$summary[5,1]
 ```
 
-    ## [1] 1030.08
+    ## [1] 1029.838
 
 Likelihood of the Schum model is just tiny better than the Spurr model. We keep it for the following.
+
+testing for a forest type effect
+================================
+
+There is three forest types in the data set: lowland (1), submontane (2), cerrado (3). Because it's quite hard to test for a forest type effect on the 3 parameters of the Schumacher model in a single step, we will first test this effect parameter per parameter and then will keep in the best likelihood improvement if the step is &gt; log(length(data)). And then, we will do the same for the remaning 2s. This ad-hoc procedure is similar to a BIC forward procedure in a glm() framework. The null-model likelihood is 1030.08.
+
+on theta\_0
+-----------
+
+``` r
+library(rstan)
+load(file="v_schum0.Rdata")
+traceplot(v_schum0, pars=c("theta_0t", "theta_1", "theta_2", "sigma"), nrow=2)
+```
+
+![](Analyses_files/figure-markdown_github/schum0%20stan%20resu-1.png)
+
+``` r
+plot(v_schum0)
+```
+
+    ## ci_level: 0.8 (80% intervals)
+
+    ## outer_level: 0.95 (95% intervals)
+
+![](Analyses_files/figure-markdown_github/schum0%20stan%20resu-2.png)
+
+``` r
+# Model likelihood
+summary(v_schum0)$summary[7,1]
+```
+
+    ## [1] 1029.603
+
+Model likelihood is not better than without the forest type effect on theta\_0
+
+on theta\_1
+-----------
+
+``` r
+library(rstan)
+load(file="v_schum1.Rdata")
+traceplot(v_schum1, pars=c("theta_0", "theta_1t", "theta_2", "sigma"), nrow=2)
+```
+
+![](Analyses_files/figure-markdown_github/schum1%20stan%20resu-1.png)
+
+``` r
+plot(v_schum1)
+```
+
+    ## ci_level: 0.8 (80% intervals)
+
+    ## outer_level: 0.95 (95% intervals)
+
+![](Analyses_files/figure-markdown_github/schum1%20stan%20resu-2.png)
+
+``` r
+# Model likelihood
+summary(v_schum1)$summary[7,1]
+```
+
+    ## [1] 1025.493
+
+Model likelihood is not better than without the forest type effect on theta\_1
+
+on theta\_2
+-----------
+
+``` r
+library(rstan)
+load(file="v_schum2.Rdata")
+traceplot(v_schum2, pars=c("theta_0", "theta_1", "theta_2t", "sigma"), nrow=2)
+```
+
+![](Analyses_files/figure-markdown_github/schum2%20stan%20resu-1.png)
+
+``` r
+plot(v_schum2)
+```
+
+    ## ci_level: 0.8 (80% intervals)
+
+    ## outer_level: 0.95 (95% intervals)
+
+![](Analyses_files/figure-markdown_github/schum2%20stan%20resu-2.png)
+
+``` r
+# Model likelihood
+summary(v_schum2)$summary[7,1]
+```
+
+    ## [1] 1029.554
+
+Model likelihood is not better than without the forest type effect on theta\_2.
+
+Conclusions
+===========
+
+-   Schumacher equations is the best one\*
+
+-   No effect of forest type on model parameters\*
+
+-   A single generic equation to be used by Forest Services\*
