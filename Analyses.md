@@ -6,7 +6,11 @@ Bruno Hérault
 -   [problem statement](#problem-statement)
     -   [data uploading](#data-uploading)
     -   [data visualization](#data-visualization)
-    -   [Including Plots](#including-plots)
+-   [Testing alternative models](#testing-alternative-models)
+    -   [Hohenald–Krenn (Finger, 1992)](#hohenaldkrenn-finger-1992)
+    -   [Husch (Finger, 1992)](#husch-finger-1992)
+    -   [Spurr (1952)](#spurr-1952)
+    -   [Schumacher-Hall (1952)](#schumacher-hall-1952)
 
 problem statement
 =================
@@ -60,8 +64,9 @@ summary(flota)
     ##  Max.   :1.0690   Max.   :15.61983
 
 ``` r
-flota$dbh<-flota$DAPcm
+flota$dbh<-flota$DAPm
 flota$h<-flota$HCm
+flota$v<-flota$VOLUME
 ```
 
 I suppose that *HCm* is the Commercial Height and *DAPm* the DBH. I change them for easy coding
@@ -79,23 +84,194 @@ scatter3D(flota$dbh, flota$h, flota$VOLUME, bty = "g", pch = 18,
 
 ![](Analyses_files/figure-markdown_github/3d-1.png)
 
+Testing alternative models
+==========================
+
+Alternative models are first tested on the whole dataset. hey are all embedded into a lognormal law to avoid predict negative values and allow increasing errors with DBH or H. Stan codes avaible in a supplementary folder in <https://github.com/BrunoHerault/volumetry>.
+
+Hohenald–Krenn (Finger, 1992)
+-----------------------------
+
+Vol = logN(theta\_0 + theta\_1.D + theta\_2.D^2, sigma)
+
 ``` r
-summary(cars)
+library(rstan)
+v_hohe <- stan(file="hohenald.stan", 
+                     data=list(N=length(flota$v), dbh=flota$dbh, h=flota$h, v=flota$v), 
+                     pars=c("theta_0", "theta_1", "theta_2", "sigma"), 
+                     chains=3, 
+                     iter=250, 
+                     warmup=100)
+save(v_hohe, file="v_hohe.Rdata")
 ```
 
-    ##      speed           dist       
-    ##  Min.   : 4.0   Min.   :  2.00  
-    ##  1st Qu.:12.0   1st Qu.: 26.00  
-    ##  Median :15.0   Median : 36.00  
-    ##  Mean   :15.4   Mean   : 42.98  
-    ##  3rd Qu.:19.0   3rd Qu.: 56.00  
-    ##  Max.   :25.0   Max.   :120.00
+``` r
+library(rstan)
+```
 
-Including Plots
----------------
+    ## Loading required package: ggplot2
 
-You can also embed plots, for example:
+    ## Loading required package: StanHeaders
 
-![](Analyses_files/figure-markdown_github/pressure-1.png)
+    ## rstan (Version 2.17.3, GitRev: 2e1f913d3ca3)
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+    ## For execution on a local, multicore CPU with excess RAM we recommend calling
+    ## options(mc.cores = parallel::detectCores()).
+    ## To avoid recompilation of unchanged Stan programs, we recommend calling
+    ## rstan_options(auto_write = TRUE)
+
+``` r
+load(file="v_hohe.Rdata")
+traceplot(v_hohe, pars=c("theta_0", "theta_1", "theta_2", "sigma"), nrow=2)
+```
+
+![](Analyses_files/figure-markdown_github/hohenald%20stan%20resu-1.png)
+
+``` r
+plot(v_hohe)
+```
+
+    ## ci_level: 0.8 (80% intervals)
+
+    ## outer_level: 0.95 (95% intervals)
+
+![](Analyses_files/figure-markdown_github/hohenald%20stan%20resu-2.png)
+
+``` r
+plot(flota$d,  flota$v)
+curve(summary(v_hohe)$summary[1,1]+x*summary(v_hohe)$summary[2,1]+x^2*summary(v_hohe)$summary[3,1], add=T, col=2)
+```
+
+![](Analyses_files/figure-markdown_github/hohenald%20stan%20resu-3.png)
+
+``` r
+# Model likelihood
+summary(v_hohe)$summary[5,1]
+```
+
+    ## [1] 383.8593
+
+theta\_0 and theta\_1 are going to take 0. The model is thus just *theta\_2.D^2* with theta\_2 around 6.8.
+
+Husch (Finger, 1992)
+--------------------
+
+Vol = logN(theta\_0.D^theta\_1, sigma)
+
+``` r
+library(rstan)
+load(file="v_husch.Rdata")
+traceplot(v_husch, pars=c("theta_0", "theta_1", "sigma"), nrow=2)
+```
+
+![](Analyses_files/figure-markdown_github/husch%20stan%20resu-1.png)
+
+``` r
+plot(v_husch)
+```
+
+    ## ci_level: 0.8 (80% intervals)
+
+    ## outer_level: 0.95 (95% intervals)
+
+![](Analyses_files/figure-markdown_github/husch%20stan%20resu-2.png)
+
+``` r
+plot(flota$d,  flota$v)
+curve(summary(v_husch)$summary[1,1]*x^summary(v_husch)$summary[2,1], add=T, col=2)
+```
+
+![](Analyses_files/figure-markdown_github/husch%20stan%20resu-3.png)
+
+``` r
+# Model likelihood
+summary(v_husch)$summary[4,1]
+```
+
+    ## [1] 423.1734
+
+Likelihood of the Husch model is far better tan the hohenald.
+
+Spurr (1952)
+------------
+
+Vol = logN(theta\_0 + theta\_1.D^2.H, sigma)
+
+``` r
+library(rstan)
+load(file="v_spurr.Rdata")
+traceplot(v_spurr, pars=c("theta_0", "theta_1", "sigma"), nrow=2)
+```
+
+![](Analyses_files/figure-markdown_github/spurr%20stan%20resu-1.png)
+
+``` r
+plot(v_spurr)
+```
+
+    ## ci_level: 0.8 (80% intervals)
+
+    ## outer_level: 0.95 (95% intervals)
+
+![](Analyses_files/figure-markdown_github/spurr%20stan%20resu-2.png)
+
+``` r
+plot(flota$d,  flota$v)
+points(flota$d, summary(v_spurr)$summary[1,1]+ summary(v_spurr)$summary[2,1]*(flota$d^2)*flota$h , add=T, col=2)
+```
+
+    ## Warning in plot.xy(xy.coords(x, y), type = type, ...): "add" is not a
+    ## graphical parameter
+
+![](Analyses_files/figure-markdown_github/spurr%20stan%20resu-3.png)
+
+``` r
+# Model likelihood
+summary(v_spurr)$summary[4,1]
+```
+
+    ## [1] 1028.428
+
+Likelihood of the Spurr model is far far far better than the other 2s.
+
+Schumacher-Hall (1952)
+----------------------
+
+Vol = logN(theta\_0 . D^(theta\_1) . H^(theta\_2), sigma), rewritten from the draft. Mathematically equivalent, no worry.
+
+``` r
+library(rstan)
+load(file="v_schum.Rdata")
+traceplot(v_schum, pars=c("theta_0", "theta_1", "theta_2", "sigma"), nrow=2)
+```
+
+![](Analyses_files/figure-markdown_github/schum%20stan%20resu-1.png)
+
+``` r
+plot(v_schum)
+```
+
+    ## ci_level: 0.8 (80% intervals)
+
+    ## outer_level: 0.95 (95% intervals)
+
+![](Analyses_files/figure-markdown_github/schum%20stan%20resu-2.png)
+
+``` r
+plot(flota$d,  flota$v)
+points(flota$d, summary(v_schum)$summary[1,1] * (flota$d^summary(v_schum)$summary[2,1]) * (flota$h^summary(v_schum)$summary[3,1]) , add=T, col=2)
+```
+
+    ## Warning in plot.xy(xy.coords(x, y), type = type, ...): "add" is not a
+    ## graphical parameter
+
+![](Analyses_files/figure-markdown_github/schum%20stan%20resu-3.png)
+
+``` r
+# Model likelihood
+summary(v_schum)$summary[5,1]
+```
+
+    ## [1] 1030.08
+
+Likelihood of the Schum model is just tiny better than the Spurr model. We keep it for the following.
