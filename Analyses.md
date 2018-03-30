@@ -151,10 +151,11 @@ curve(summary(v_hohe)$summary[1,1]+x*summary(v_hohe)$summary[2,1]+x^2*summary(v_
 
 ``` r
 # Model likelihood
-summary(v_hohe)$summary[5,1]
+summary(v_hohe)$summary[,1]
 ```
 
-    ## [1] 383.8593
+    ##      theta_0      theta_1      theta_2        sigma         lp__ 
+    ## 2.802837e-05 4.516205e-04 6.803442e+00 4.465828e-01 3.838593e+02
 
 theta\_0 and theta\_1 are going to take 0. The model is thus just *theta\_2.D^2* with theta\_2 around 6.8.
 
@@ -190,10 +191,11 @@ curve(summary(v_husch)$summary[1,1]*x^summary(v_husch)$summary[2,1], add=T, col=
 
 ``` r
 # Model likelihood
-summary(v_husch)$summary[4,1]
+summary(v_husch)$summary[,1]
 ```
 
-    ## [1] 423.1734
+    ##    theta_0    theta_1      sigma       lp__ 
+    ##   8.524776   2.206694   0.432875 423.173396
 
 Likelihood of the Husch model is far better tan the hohenald.
 
@@ -232,10 +234,11 @@ points(flota$d, summary(v_spurr)$summary[1,1]+ summary(v_spurr)$summary[2,1]*(fl
 
 ``` r
 # Model likelihood
-summary(v_spurr)$summary[4,1]
+summary(v_spurr)$summary[,1]
 ```
 
-    ## [1] 1028.428
+    ##      theta_0      theta_1        sigma         lp__ 
+    ## 1.809958e-02 6.439654e-01 2.687428e-01 1.028428e+03
 
 Likelihood of the Spurr model is far far far better than the other 2s.
 
@@ -274,10 +277,11 @@ points(flota$d, summary(v_schum)$summary[1,1] * (flota$d^summary(v_schum)$summar
 
 ``` r
 # Model likelihood
-summary(v_schum)$summary[5,1]
+summary(v_schum)$summary[,1]
 ```
 
-    ## [1] 1029.838
+    ##      theta_0      theta_1      theta_2        sigma         lp__ 
+    ##    0.7998703    1.8818652    0.8754212    0.2679093 1029.8377480
 
 Likelihood of the Schum model is just tiny better than the Spurr model. We keep it for the following.
 
@@ -309,10 +313,13 @@ plot(v_schum0)
 
 ``` r
 # Model likelihood
-summary(v_schum0)$summary[7,1]
+summary(v_schum0)$summary[,1]
 ```
 
-    ## [1] 1029.603
+    ##  theta_0t[1]  theta_0t[2]  theta_0t[3]      theta_1      theta_2 
+    ##    0.8063154    0.7785425    0.7857114    1.8807557    0.8755113 
+    ##        sigma         lp__ 
+    ##    0.2675085 1029.6026365
 
 Model likelihood is not better than without the forest type effect on theta\_0
 
@@ -339,10 +346,13 @@ plot(v_schum1)
 
 ``` r
 # Model likelihood
-summary(v_schum1)$summary[7,1]
+summary(v_schum1)$summary[,1]
 ```
 
-    ## [1] 1025.493
+    ##      theta_0  theta_1t[1]  theta_1t[2]  theta_1t[3]      theta_2 
+    ##    0.8021497    1.8724876    1.9037411    1.8998137    0.8739905 
+    ##        sigma         lp__ 
+    ##    0.2671923 1025.4929655
 
 Model likelihood is not better than without the forest type effect on theta\_1
 
@@ -369,10 +379,13 @@ plot(v_schum2)
 
 ``` r
 # Model likelihood
-summary(v_schum2)$summary[7,1]
+summary(v_schum2)$summary[,1]
 ```
 
-    ## [1] 1029.554
+    ##      theta_0      theta_1  theta_2t[1]  theta_2t[2]  theta_2t[3] 
+    ##    0.8012074    1.8810914    0.8781434    0.8636331    0.8674600 
+    ##        sigma         lp__ 
+    ##    0.2674589 1029.5541187
 
 Model likelihood is not better than without the forest type effect on theta\_2.
 
